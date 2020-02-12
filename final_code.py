@@ -285,3 +285,55 @@ class VSH_GUI(Frame):
         j2 = (self.ent_j2.get())  
         m2 = (self.ent_m2.get())  
         l2 = (self.ent_l2.get())  
+        #retrive from dictionary   
+        key1 = j1+l1+m1  
+        key2 = j2+l2+m2  
+        y1 = VSH[key1]  
+        y2 = VSH[key2]  
+  
+  
+        #Define phi and theta  
+        theta = np.linspace(0,np.pi,11)  
+        phi = np.linspace(0,2*np.pi,21)  
+  
+        #calculate Y   
+        Y1 = self.calc_y(y1['e1min1_CG'], y1['e1min1_m'],y1['e1min1_l'], y1['e10_CG'], y1['e10_m'], y1['e10_l'], y1['e1pl1_CG'], y1['e1pl1_m'], y1['e1pl1_l'], theta, phi)  
+        Y2 = self.calc_y(y2['e1min1_CG'], y2['e1min1_m'],y2['e1min1_l'], y2['e10_CG'], y2['e10_m'], y2['e10_l'], y2['e1pl1_CG'], y2['e1pl1_m'], y2['e1pl1_l'], theta, phi)  
+  
+        #combine Y1 and Y2  
+  
+        Y = f1 * Y1 + f2 * Y2  
+  
+        if self.ComplexPartBox.get() == 'Real':  
+            Y = Y.real  
+        elif self.ComplexPartBox.get() == 'Imag':  
+            Y = Y.imag  
+        elif self.ComplexPartBox.get() == 'Mod':  
+            Y = np.sqrt(Y.real**2+Y.imag**2)  
+        #Convert theta & phi to Cartesian for plotting coordinates  
+        x = np.zeros(shape=(len(theta),len(phi)))  
+        y = np.zeros(shape=(len(theta),len(phi)))  
+        z = np.zeros(shape=(len(theta),len(phi)))  
+        for i in range(len(theta)):  
+            for j in range(len(phi)):  
+                x[i,j] = np.sin(theta[i])*np.cos(phi[j])  
+                y[i,j] = np.sin(theta[i])*np.sin(phi[j])  
+                z[i,j] = np.cos(theta[i])  
+        #Setup plot for 3D surface  
+        ax = self.Fig.gca(projection='3d')  
+        ax.quiver(x, y, z, Y[:,:,0], Y[:,:,1], Y[:,:,2], length=0.2)#,pivot='middle')  
+        #Plot  
+        #ax.set_axis_off()  
+        ax.view_init(elev=25,azim=42)  
+        ax.set_xlabel(r'$\mathrm{x}$')  
+        ax.set_ylabel(r'$\mathrm{y}$')  
+        ax.set_zlabel(r'$\mathrm{z}$')  
+        plt.gcf().canvas.draw()  
+  
+# Main program  
+  
+root= Tk()                             # starts up the tkinter package  
+VSH_GUI(root)                          # defined the frame of the GUI  
+root.mainloop()                        # wait for instructions from GUI  
+sys.exit(1)                            # Close all top level processes  
+ 
